@@ -26,43 +26,35 @@ func main() {
 	defer cl.Close()	
 
 	// Deploy Smart Contract
-	//contractAddress := deploySmartContract(cl)
+	contractAddress := deploySmartContract(cl)
 
 	// Load Smart Contract
-	contract := loadSmartContract(cl, "0x503D882c539D94355D8fCEC53A187D188257Ff7D")
+	contract := loadSmartContract(cl, contractAddress.Hex())
 	
-	// Write a new message
+	// Write a new message 1
 	txWriteOptions := createTransaction(cl)
 	txWrite, err := contract.Write(txWriteOptions, "marcgurt", "message from go! (3)")
 	if (err != nil) {
 	log.Fatalf("Error executing operation 'Write' of MessageService")
 	}
 	waitForBlock(cl, txWrite)
-	log.Printf("Message write successfully. Hash: %v", txWrite.Hash().Hex())
+	log.Printf("Message 1 write successfully. Hash: %v", txWrite.Hash().Hex())
 	
-	// Retrieve messages
-	messages, err := contract.RetrieveAll(&bind.CallOpts{})
+	// Write a new message 2
+	txWriteOptions = createTransaction(cl)
+	txWrite, err = contract.Write(txWriteOptions, "marcgurt", "message from go! (3)")
 	if (err != nil) {
-		log.Fatal("RetrieveAll operation failed")
+	log.Fatalf("Error executing operation 'Write' of MessageService")
 	}
-	log.Printf("Retrieved messages: %v", messages)
-	
-	// Mark message as read
-	txOptionsRead := createTransaction(cl)
-	txReadAll, err := contract.ReadAll(txOptionsRead)
-	if (err != nil) {
-	log.Fatal("txReadAll operation failed")
-	}
-	waitForBlock(cl, txReadAll)
-	log.Printf("All messages mark as read. Tx: %v", txReadAll.Hash().Hex())
+	waitForBlock(cl, txWrite)
+	log.Printf("Message 2 write successfully. Hash: %v", txWrite.Hash().Hex())
 
-	// Retrieve messages
-	messages, err = contract.RetrieveAll(&bind.CallOpts{})
+	// Get number of messages
+	numberOfMessages, err := contract.GetNumberOfMessages(&bind.CallOpts{})
 	if (err != nil) {
-		log.Fatal("RetrieveAll operation failed")
+		log.Fatal("Error getting number of messages")
 	}
-	log.Printf("Retrieved messages: %v", messages)
-
+	log.Printf("Number of messages: %v", numberOfMessages)
 }
 
 func deploySmartContract(cl *ethclient.Client) common.Address {
